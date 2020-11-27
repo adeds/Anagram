@@ -17,16 +17,23 @@ package com.google.engedu.anagrams
 import java.io.BufferedReader
 import java.io.Reader
 import java.util.*
+import kotlin.collections.ArrayList
 
 class AnagramDictionary(reader: Reader?) {
     private val random = Random()
+    private val wordList: ArrayList<String> = arrayListOf()
+    private lateinit var wordSet: HashSet<String>
+    private val lettersToWord: HashMap<String, List<String>> = hashMapOf()
 
     fun isGoodWord(word: String?, base: String?): Boolean {
         return true
     }
 
-    fun getAnagrams(targetWord: String?): MutableList<String> {
-        return ArrayList()
+    fun getAnagrams(targetWord: String): List<String> {
+        val sorted = sortLetters(targetWord)
+        return wordList.filter { s ->
+            s.length == sorted.length && sortLetters(s) == sorted
+        }.apply { lettersToWord[sorted] = wordList }
     }
 
     fun getAnagramsWithOneMoreLetter(word: String?): List<String> {
@@ -35,6 +42,13 @@ class AnagramDictionary(reader: Reader?) {
 
     fun pickGoodStarterWord(): String {
         return "stop"
+    }
+
+    private fun sortLetters(word: String) = String(word.toCharArray().apply { Arrays.sort(this) })
+
+
+    fun lettersToWord(word: String?) {
+
     }
 
     companion object {
@@ -48,7 +62,7 @@ class AnagramDictionary(reader: Reader?) {
         var line: String
         while (
             `in`.readLine().also { line = it.orEmpty() } != null) {
-            val word = line.trim { it <= ' ' }
+            line.trim { it <= ' ' }.let { wordList.add(it) }
         }
     }
 }
