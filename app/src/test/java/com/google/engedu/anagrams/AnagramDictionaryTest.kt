@@ -45,7 +45,6 @@ class AnagramDictionaryTest {
             "strop",
             "posts",
             "spots",
-            "stops",
             "pouts",
             "spout",
             "typos",
@@ -53,7 +52,6 @@ class AnagramDictionaryTest {
             "post",
             "pots",
             "spot",
-            "stop",
             "tops"
         )
 

@@ -68,11 +68,13 @@ class AnagramDictionary(reader: Reader?) {
         )
 
         val oneMoreAnagram = mutableListOf<String>()
-        alphabet.forEach {
-            val addedWord = sortLetters(word + it)
-            oneMoreAnagram.addAll(lettersToWord.getOrElse(addedWord) { emptyList() })
+        alphabet.forEach { letter ->
+            val addedWord = sortLetters(word + letter)
+            val addedWordList = lettersToWord.getOrElse(addedWord) { emptyList() }
+            oneMoreAnagram.addAll(addedWordList.filter { isGoodWord(it, word) })
         }
         oneMoreAnagram.addAll(lettersToWord.getOrElse(sortLetters(word)) { emptyList() })
+        oneMoreAnagram.remove(word)
         return oneMoreAnagram
     }
 

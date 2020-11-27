@@ -47,7 +47,7 @@ class AnagramsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAnagramsBinding.inflate(layoutInflater)
-        contentBinding = ContentAnagramsBinding.bind(binding.root)
+        contentBinding = ContentAnagramsBinding.bind(binding.content.root)
         setContentView(binding.root)
         anagrams = mutableListOf()
 
@@ -89,11 +89,11 @@ class AnagramsActivity : AppCompatActivity() {
         }
         var color = "#cc0029"
         if (dictionary.isGoodWord(word, currentWord.orEmpty()) && anagrams.contains(word)) {
-            anagrams.remove(word)
             color = "#00aa29"
         } else {
             word = "X $word"
         }
+        anagrams.remove(word)
         contentBinding.resultView.append(Html.fromHtml(String.format("<font color=%s>%s</font><BR>", color, word)))
         editText.setText("")
         val fab = findViewById<FloatingActionButton>(R.id.fab)
