@@ -68,9 +68,29 @@ class AnagramDictionaryTest {
 
     @Test
     fun `pickGoodWord get good word?`() {
-        val candidate = anagramDictionary.pickGoodStarterWord()
-        println(candidate)
-        assertTrue(anagramDictionary.getAnagramsWithOneMoreLetter(candidate).size >= MIN_NUM_ANAGRAMS)
+        val candidate3 = anagramDictionary.pickGoodStarterWord()
+        println(candidate3)
+        assertTrue(anagramDictionary.getAnagramsWithOneMoreLetter(candidate3).size >= MIN_NUM_ANAGRAMS)
+
+        val candidate4 = anagramDictionary.pickGoodStarterWord()
+        println(candidate4)
+        assertTrue(anagramDictionary.getAnagramsWithOneMoreLetter(candidate4).size >= MIN_NUM_ANAGRAMS)
+
+        val candidate5 = anagramDictionary.pickGoodStarterWord()
+        println(candidate5)
+        assertTrue(anagramDictionary.getAnagramsWithOneMoreLetter(candidate5).size >= MIN_NUM_ANAGRAMS)
+
+        val candidate6 = anagramDictionary.pickGoodStarterWord()
+        println(candidate6)
+        assertTrue(anagramDictionary.getAnagramsWithOneMoreLetter(candidate6).size >= MIN_NUM_ANAGRAMS)
+
+        val candidate7 = anagramDictionary.pickGoodStarterWord()
+        println(candidate7)
+        assertTrue(anagramDictionary.getAnagramsWithOneMoreLetter(candidate7).size >= MIN_NUM_ANAGRAMS)
+
+        val candidate8 = anagramDictionary.pickGoodStarterWord()
+        println(candidate8)
+        assertTrue(anagramDictionary.getAnagramsWithOneMoreLetter(candidate8).size >= MIN_NUM_ANAGRAMS)
     }
 
     @Test

@@ -121,7 +121,7 @@ class AnagramsActivity : AppCompatActivity() {
             currentWord = dictionary.pickGoodStarterWord()
 
             anagrams.clear()
-            anagrams.addAll(dictionary.getAnagrams(currentWord.orEmpty()))
+            anagrams.addAll(dictionary.getAnagramsWithOneMoreLetter(currentWord.orEmpty()))
 
             contentBinding.gameStatusView.text = Html.fromHtml(
                 String.format(

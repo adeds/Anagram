@@ -22,7 +22,9 @@ import kotlin.random.Random
 class AnagramDictionary(reader: Reader?) {
     val wordList: MutableList<String> = mutableListOf()
     val wordSet: HashSet<String> = hashSetOf()
+    var wordLength = DEFAULT_WORD_LENGTH
     private val lettersToWord: HashMap<String, List<String>> = hashMapOf()
+    private val sizeToWords: HashMap<Int, List<String>> = hashMapOf()
 
     fun isGoodWord(word: String, base: String): Boolean {
         return wordSet.contains(word) && word.contains(base).not()
@@ -75,14 +77,16 @@ class AnagramDictionary(reader: Reader?) {
     }
 
     fun pickGoodStarterWord(): String {
-        val goodWord : String
-        while (true){
-            val candidate = wordList[Random.nextInt(0, wordList.size)]
-            if (getAnagramsWithOneMoreLetter(candidate).size >= MIN_NUM_ANAGRAMS){
+        val goodWord: String
+        while (true) {
+            val wordLimit = sizeToWords[wordLength].orEmpty()
+            val candidate = wordLimit[Random.nextInt(0, wordLimit.size)]
+            if (getAnagramsWithOneMoreLetter(candidate).size >= MIN_NUM_ANAGRAMS) {
                 goodWord = candidate
                 break
             }
         }
+        if (wordLength<MAX_WORD_LENGTH) wordLength++
         return goodWord
     }
 
@@ -105,6 +109,10 @@ class AnagramDictionary(reader: Reader?) {
                 val sorted = sortLetters(it)
 
                 lettersToWord[sorted] = lettersToWord.getOrElse(sorted) { emptyList() }
+                    .toMutableList()
+                    .apply { add(it) }
+
+                sizeToWords[sorted.length] = sizeToWords.getOrElse(sorted.length) { emptyList() }
                     .toMutableList()
                     .apply { add(it) }
             }
