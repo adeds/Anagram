@@ -30,17 +30,27 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.engedu.anagrams.databinding.ActivityAnagramsBinding
+import com.google.engedu.anagrams.databinding.ContentAnagramsBinding
 import java.io.IOException
 import java.io.InputStreamReader
+import java.util.*
 
 class AnagramsActivity : AppCompatActivity() {
     private var currentWord: String? = null
     private lateinit var dictionary: AnagramDictionary
     private lateinit var anagrams: MutableList<String>
+    private lateinit var binding: ActivityAnagramsBinding
+    private lateinit var contentBinding: ContentAnagramsBinding
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_anagrams)
+        binding = ActivityAnagramsBinding.inflate(layoutInflater)
+        contentBinding = ContentAnagramsBinding.bind(binding.content.root)
+        setContentView(binding.root)
+        anagrams = mutableListOf()
+
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         val assetManager = assets
@@ -51,34 +61,40 @@ class AnagramsActivity : AppCompatActivity() {
             val toast = Toast.makeText(this, "Could not load dictionary", Toast.LENGTH_LONG)
             toast.show()
         }
-        // Set up the EditText box to process the content of the box when the user hits 'enter'
-        val editText = findViewById<View>(R.id.editText) as EditText
-        editText.setRawInputType(InputType.TYPE_CLASS_TEXT)
-        editText.imeOptions = EditorInfo.IME_ACTION_GO
-        editText.setOnEditorActionListener { v, actionId, event ->
-            var handled = false
-            if (actionId == EditorInfo.IME_ACTION_GO || actionId == EditorInfo.IME_NULL && event != null && event.action == KeyEvent.ACTION_DOWN) {
-                processWord(editText)
-                handled = true
+        // init click listener
+        initClickListener()
+
+    }
+
+    private fun initClickListener() {
+        contentBinding.editText.apply {
+            setRawInputType(InputType.TYPE_CLASS_TEXT)
+            imeOptions = EditorInfo.IME_ACTION_GO
+            setOnEditorActionListener { _, actionId, event ->
+                var handled = false
+                if (actionId == EditorInfo.IME_ACTION_GO || actionId == EditorInfo.IME_NULL && event != null && event.action == KeyEvent.ACTION_DOWN) {
+                    processWord(this)
+                    handled = true
+                }
+                handled
             }
-            handled
         }
+        binding.fab.setOnClickListener { defaultAction() }
     }
 
     private fun processWord(editText: EditText) {
-        val resultView = findViewById<View>(R.id.resultView) as TextView
-        var word = editText.text.toString().trim { it <= ' ' }.toLowerCase()
-        if (word.length == 0) {
+        var word = editText.text.toString().trim { it <= ' ' }.toLowerCase(Locale.ROOT)
+        if (word.isEmpty()) {
             return
         }
         var color = "#cc0029"
-        if (dictionary!!.isGoodWord(word, currentWord) && anagrams!!.contains(word)) {
-            anagrams.remove(word)
+        if (dictionary.isGoodWord(word, currentWord.orEmpty()) && anagrams.contains(word)) {
             color = "#00aa29"
         } else {
             word = "X $word"
         }
-        resultView.append(Html.fromHtml(String.format("<font color=%s>%s</font><BR>", color, word)))
+        anagrams.remove(word)
+        contentBinding.resultView.append(Html.fromHtml(String.format("<font color=%s>%s</font><BR>", color, word)))
         editText.setText("")
         val fab = findViewById<FloatingActionButton>(R.id.fab)
         fab.show()
@@ -100,38 +116,38 @@ class AnagramsActivity : AppCompatActivity() {
         } else super.onOptionsItemSelected(item)
     }
 
-    fun defaultAction(view: View?): Boolean {
-        val gameStatus = findViewById<TextView>(R.id.gameStatusView)
-        val fab = findViewById<FloatingActionButton>(R.id.fab)
-        val editText = findViewById<EditText>(R.id.editText)
-        val resultView = findViewById<TextView>(R.id.resultView)
+    private fun defaultAction() {
         if (currentWord == null) {
             currentWord = dictionary.pickGoodStarterWord()
-            anagrams = dictionary.getAnagrams(currentWord)
-            gameStatus.text = Html.fromHtml(
+
+            anagrams.clear()
+            anagrams.addAll(dictionary.getAnagramsWithOneMoreLetter(currentWord.orEmpty()))
+
+            contentBinding.gameStatusView.text = Html.fromHtml(
                 String.format(
                     START_MESSAGE,
-                    currentWord!!.toUpperCase(),
+                    currentWord.orEmpty().toUpperCase(Locale.ROOT),
                     currentWord
                 )
             )
-            fab.setImageResource(android.R.drawable.ic_menu_help)
-            fab.hide()
-            resultView.text = ""
-            editText.setText("")
-            editText.isEnabled = true
-            editText.requestFocus()
-            val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
+            binding.fab.setImageResource(android.R.drawable.ic_menu_help)
+            binding.fab.hide()
+            contentBinding.resultView.text = ""
+            contentBinding.editText.apply {
+                setText("")
+                isEnabled = true
+                requestFocus()
+                val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
+            }
         } else {
-            editText.setText(currentWord)
-            editText.isEnabled = false
-            fab.setImageResource(android.R.drawable.ic_media_play)
+            contentBinding.editText.setText(currentWord)
+            contentBinding.editText.isEnabled = false
+            binding.fab.setImageResource(android.R.drawable.ic_media_play)
             currentWord = null
-            resultView.append(TextUtils.join("\n", anagrams))
-            gameStatus.append(" Hit 'Play' to start again")
+            contentBinding.resultView.append(TextUtils.join("\n", anagrams))
+            contentBinding.gameStatusView.append(" Hit 'Play' to start again")
         }
-        return true
     }
 
     companion object {

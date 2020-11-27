@@ -17,28 +17,85 @@ package com.google.engedu.anagrams
 import java.io.BufferedReader
 import java.io.Reader
 import java.util.*
+import kotlin.random.Random
 
 class AnagramDictionary(reader: Reader?) {
-    private val random = Random()
+    val wordList: MutableList<String> = mutableListOf()
+    val wordSet: HashSet<String> = hashSetOf()
+    var wordLength = DEFAULT_WORD_LENGTH
+    private val lettersToWord: HashMap<String, List<String>> = hashMapOf()
+    private val sizeToWords: HashMap<Int, List<String>> = hashMapOf()
 
-    fun isGoodWord(word: String?, base: String?): Boolean {
-        return true
+    fun isGoodWord(word: String, base: String): Boolean {
+        return wordSet.contains(word) && word.contains(base).not()
     }
 
-    fun getAnagrams(targetWord: String?): MutableList<String> {
-        return ArrayList()
+    fun getAnagrams(targetWord: String): List<String> {
+        val sorted = sortLetters(targetWord)
+        return wordList.filter { s ->
+            s.length == sorted.length && sortLetters(s) == sorted
+        }
     }
 
-    fun getAnagramsWithOneMoreLetter(word: String?): List<String> {
-        return ArrayList()
+    fun getAnagramsWithOneMoreLetter(word: String): List<String> {
+        val alphabet = listOf(
+            "a",
+            "b",
+            "c",
+            "d",
+            "e",
+            "f",
+            "g",
+            "h",
+            "i",
+            "j",
+            "k",
+            "l",
+            "m",
+            "n",
+            "o",
+            "p",
+            "q",
+            "r",
+            "s",
+            "t",
+            "u",
+            "v",
+            "w",
+            "x",
+            "y",
+            "z"
+        )
+
+        val oneMoreAnagram = mutableListOf<String>()
+        alphabet.forEach { letter ->
+            val addedWord = sortLetters(word + letter)
+            val addedWordList = lettersToWord.getOrElse(addedWord) { emptyList() }
+            oneMoreAnagram.addAll(addedWordList.filter { isGoodWord(it, word) })
+        }
+        oneMoreAnagram.addAll(lettersToWord.getOrElse(sortLetters(word)) { emptyList() })
+        oneMoreAnagram.remove(word)
+        return oneMoreAnagram
     }
 
     fun pickGoodStarterWord(): String {
-        return "stop"
+        val goodWord: String
+        while (true) {
+            val wordLimit = sizeToWords[wordLength].orEmpty()
+            val candidate = wordLimit[Random.nextInt(0, wordLimit.size)]
+            if (getAnagramsWithOneMoreLetter(candidate).size >= MIN_NUM_ANAGRAMS) {
+                goodWord = candidate
+                break
+            }
+        }
+        if (wordLength<MAX_WORD_LENGTH) wordLength++
+        return goodWord
     }
 
+    private fun sortLetters(word: String) = String(word.toCharArray().apply { Arrays.sort(this) })
+
     companion object {
-        private const val MIN_NUM_ANAGRAMS = 5
+        const val MIN_NUM_ANAGRAMS = 5
         private const val DEFAULT_WORD_LENGTH = 3
         private const val MAX_WORD_LENGTH = 7
     }
@@ -48,7 +105,19 @@ class AnagramDictionary(reader: Reader?) {
         var line: String
         while (
             `in`.readLine().also { line = it.orEmpty() } != null) {
-            val word = line.trim { it <= ' ' }
+            line.trim { it <= ' ' }.toLowerCase(Locale.ROOT).let {
+                wordList.add(it)
+                wordSet.add(it)
+                val sorted = sortLetters(it)
+
+                lettersToWord[sorted] = lettersToWord.getOrElse(sorted) { emptyList() }
+                    .toMutableList()
+                    .apply { add(it) }
+
+                sizeToWords[sorted.length] = sizeToWords.getOrElse(sorted.length) { emptyList() }
+                    .toMutableList()
+                    .apply { add(it) }
+            }
         }
     }
 }
