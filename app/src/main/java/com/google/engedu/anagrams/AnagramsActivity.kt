@@ -83,19 +83,18 @@ class AnagramsActivity : AppCompatActivity() {
     }
 
     private fun processWord(editText: EditText) {
-        val resultView = findViewById<View>(R.id.resultView) as TextView
         var word = editText.text.toString().trim { it <= ' ' }.toLowerCase(Locale.ROOT)
         if (word.isEmpty()) {
             return
         }
         var color = "#cc0029"
-        if (dictionary.isGoodWord(word, currentWord) && anagrams.contains(word)) {
+        if (dictionary.isGoodWord(word, currentWord.orEmpty()) && anagrams.contains(word)) {
             anagrams.remove(word)
             color = "#00aa29"
         } else {
             word = "X $word"
         }
-        resultView.append(Html.fromHtml(String.format("<font color=%s>%s</font><BR>", color, word)))
+        contentBinding.resultView.append(Html.fromHtml(String.format("<font color=%s>%s</font><BR>", color, word)))
         editText.setText("")
         val fab = findViewById<FloatingActionButton>(R.id.fab)
         fab.show()
